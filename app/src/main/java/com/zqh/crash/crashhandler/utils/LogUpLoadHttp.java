@@ -10,22 +10,86 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class LogUpLoadHttp {
 
 	public static final String DEVICE_CONTROL_URL = "http://172.16.3.245:3521/api/carsh/job";
+	public static final String MULTIPART_FORM_DATA = "multipart/form-data"; // 指明要上传的文件格式
 
 	/**
+	 * 上传文件
 	 * @param crashFile
-	 *            crash文件
 	 */
-	public static void upLoadHttp(final File crashFile) {
+	public static void upLoadFile(final File crashFile){
+		String uuid = CommonUtils.getUUID();
+		// 设备sn 122006000075
+		String dsnCode = android.os.Build.SERIAL;
+		// 发行商id 00100017
+		String vidCode = CommonUtils.getStringFromSettings(
+				MyApplication.getInstance(), "publisher_id");
+
+		final okhttp3.OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder();
+		OkHttpClient okHttpClient = httpBuilder
+				.connectTimeout(100, TimeUnit.SECONDS) // 设置请求超时时间
+				.writeTimeout(150, TimeUnit.SECONDS).build();
+
+		// 根据文件格式封装文件
+		RequestBody requestFile = RequestBody.create(
+				MediaType.parse(MULTIPART_FORM_DATA), crashFile);
+
+		// 初始化请求体对象，设置Content-Type以及文件数据流
+		RequestBody requestBody = new MultipartBody.Builder()
+				// 建立请求的内容
+				.setType(MultipartBody.FORM)
+				// multipart/form-data
+				.addFormDataPart("uuid", uuid)
+				.addFormDataPart("dSn", dsnCode)// 设备SN
+				.addFormDataPart("uploadTime", SystemClock.currentThreadTimeMillis()+"")// 发行商sn
+				.addFormDataPart("vId", vidCode)// 发行商id
+				// 第一个参数是服务器接收的名称，第二个是上传文件的名字，第三个是上传的文件
+				.addFormDataPart("logfile", crashFile.getName(), requestFile)
+				.build();
+
+		// 封装OkHttp请求对象，初始化请求参数
+		Request request = new Request.Builder().url(DEVICE_CONTROL_URL) // 上传url地址
+				.post(requestBody) // post请求体
+				.build();
+
+		// 发起异步网络请求
+		okHttpClient.newCall(request).enqueue(new Callback() {
+
+			@Override
+			public void onResponse(Call call, okhttp3.Response response)
+					throws IOException {
+				Log.d("zqh", "response = " + response.body().string());
+				deleteFile(crashFile);
+			}
+
+			@Override
+			public void onFailure(Call call, IOException e) {
+				Log.e("zqh", "error = " + e.toString());
+				crashFile.delete();
+			}
+		});
+
+	}
+
+
+	/**
+	 * 上传文件内容
+	 * @param crashFileLog
+	 *            crash文件内容
+	 */
+	public static void upLoadHttp(final File crashFileLog) {
 
 		String uuid = CommonUtils.getUUID();
 		// 设备sn 122006000075
@@ -34,15 +98,15 @@ public class LogUpLoadHttp {
 		String vidCode = CommonUtils.getStringFromSettings(
 				MyApplication.getInstance(), "publisher_id");
 
-		StringBuilder readFile = FileUtil.readFile(crashFile, "UTF-8");
+		StringBuilder readFile = FileUtil.readFile(crashFileLog, "UTF-8");
 		
 		Log.e("zqh", "str2HexStr = "+HexUtils.str2HexStr(readFile.toString()));
 		String md5SixString = MD5Util.getMD5SixString2(readFile.toString());
 		Log.e("zqh", "md5SixString = "+md5SixString);
 
-		String crashFileLog = getParamsCrashFileLog(uuid, dsnCode, vidCode,
+		String crashFilelog = getParamsCrashFileLog(uuid, dsnCode, vidCode,
 				readFile);
-		Log.d("zqh", "crashFileLog = " + crashFileLog);
+		Log.d("zqh", "crashFileLog = " + crashFilelog);
 
 		// step 1: 同样的需要创建一个OkHttpClick对象
 		OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -56,7 +120,7 @@ public class LogUpLoadHttp {
 				.add("dSn", dsnCode)
 				.add("uploadTime", SystemClock.currentThreadTimeMillis()+"")// 发行商sn
 				.add("vId", vidCode)// 发行商id
-				.add("log", crashFileLog)
+				.add("log", crashFilelog)
 				.add("md5lg", md5SixString)
 				.build();
 
@@ -71,14 +135,14 @@ public class LogUpLoadHttp {
 			@Override
 			public void onFailure(Call call, IOException e) {
 				Log.e("zqh", "error = " + e.toString());
-				crashFile.delete();
+				crashFileLog.delete();
 			}
 
 			@Override
 			public void onResponse(Call call, Response response)
 					throws IOException {
 				Log.d("zqh", "response = " + response.body().string());
-				deleteFile(crashFile);
+				deleteFile(crashFileLog);
 			}
 		});
 	}
