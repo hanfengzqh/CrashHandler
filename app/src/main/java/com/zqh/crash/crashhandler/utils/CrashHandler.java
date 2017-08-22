@@ -23,9 +23,7 @@ import java.util.Map;
 
 
 /**
- * DarkRanger的全局异常处理类
- * 
- * @author DarkRanger
+ * 全局异常处理类
  *
  */
 public abstract class CrashHandler implements UncaughtExceptionHandler {
@@ -197,7 +195,7 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 	 * @param crashText
 	 */
 	protected void saveToCrashFile(String crashText) {
-		Log.e("zqh", "CrashHandler is writing crash-info to CrashFile("
+		Log.d("zqh", "CrashHandler is writing crash-info to CrashFile("
 				+ this.mDRCrashFilePath + ")! ");
 
 		crashFile = new File(mDRCrashFilePath);
