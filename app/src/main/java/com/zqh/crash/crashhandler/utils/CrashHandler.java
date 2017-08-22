@@ -8,8 +8,6 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.zqh.crash.crashhandler.app.MyApplication;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -32,7 +30,7 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 	private UncaughtExceptionHandler mDefaultHandler;
 
 	/** 程序context **/
-	protected MyApplication mContext;
+	protected Context mContext;
 
 	/** 存储设备信息和异常信息 **/
 	private Map<String, String> mInfos = new HashMap<String, String>();
@@ -48,7 +46,7 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 	 * 
 	 * @param context
 	 */
-	public void init(MyApplication context) {
+	public void init(Context context) {
 		// 1、上下文
 		mContext = context;
 		// 2、获取系统默认的UncaughtException处理器

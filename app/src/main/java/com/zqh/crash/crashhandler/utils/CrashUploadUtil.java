@@ -1,6 +1,7 @@
 package com.zqh.crash.crashhandler.utils;
 
 
+import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -20,7 +21,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class LogUpLoadHttp {
+public class CrashUploadUtil {
 
 	public static final String DEVICE_CONTROL_URL = "http://172.16.3.245:3521/api/carsh/job";
 	public static final String MULTIPART_FORM_DATA = "multipart/form-data"; // 指明要上传的文件格式
@@ -89,14 +90,14 @@ public class LogUpLoadHttp {
 	 * @param crashFileLog
 	 *            crash文件内容
 	 */
-	public static void upLoadHttp(final File crashFileLog) {
+	public static void upLoadHttp(final File crashFileLog, Context mContext) {
 
 		String uuid = CommonUtils.getUUID();
 		// 设备sn 122006000075
 		String dsnCode = android.os.Build.SERIAL;
 		// 发行商id 00100017
 		String vidCode = CommonUtils.getStringFromSettings(
-				MyApplication.getInstance(), "publisher_id");
+				mContext, "publisher_id");
 
 		StringBuilder readFile = FileUtil.readFile(crashFileLog, "UTF-8");
 		

@@ -1,7 +1,7 @@
 package com.zqh.crash.crashhandler.app;
 
 import com.zqh.crash.crashhandler.utils.CrashHandler;
-import com.zqh.crash.crashhandler.utils.LogUpLoadHttp;
+import com.zqh.crash.crashhandler.utils.CrashUploadUtil;
 
 import java.io.File;
 
@@ -18,7 +18,7 @@ public class MyCrashHandler extends CrashHandler {
 	 * 初始化,注册Context对象, 获取系统默认的UncaughtException处理器, 设置该CrashHandler为程序的默认处理器
 	 */
 	private MyCrashHandler() {
-		CRASH_FILE_PATH = MyApplication.getInstance().getDir("stacktraces", 0)
+		CRASH_FILE_PATH = mContext.getDir("stacktraces", 0)
 				.getAbsolutePath()
 				+ File.separator + "crash" + ".stacktrace";
 	}
@@ -49,6 +49,6 @@ public class MyCrashHandler extends CrashHandler {
 	 */
 	@Override
 	public void sendToServer(File crashFile) {
-		LogUpLoadHttp.upLoadHttp(crashFile);
+		CrashUploadUtil.upLoadHttp(crashFile,mContext);
 	}
 }
