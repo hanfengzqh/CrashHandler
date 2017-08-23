@@ -23,14 +23,13 @@ import okhttp3.Response;
 
 public class CrashUploadUtil {
 
-	public static final String DEVICE_CONTROL_URL = "http://172.16.3.245:3521/api/carsh/job";
 	public static final String MULTIPART_FORM_DATA = "multipart/form-data"; // 指明要上传的文件格式
 
 	/**
 	 * 上传文件
 	 * @param crashFile
 	 */
-	public static void upLoadFile(final File crashFile){
+	public static void upLoadFile(final File crashFile,String server_url){
 		String uuid = CommonUtils.getUUID();
 		// 设备sn 122006000075
 		String dsnCode = android.os.Build.SERIAL;
@@ -61,7 +60,7 @@ public class CrashUploadUtil {
 				.build();
 
 		// 封装OkHttp请求对象，初始化请求参数
-		Request request = new Request.Builder().url(DEVICE_CONTROL_URL) // 上传url地址
+		Request request = new Request.Builder().url(server_url) // 上传url地址
 				.post(requestBody) // post请求体
 				.build();
 
@@ -90,7 +89,7 @@ public class CrashUploadUtil {
 	 * @param crashFileLog
 	 *            crash文件内容
 	 */
-	public static void upLoadHttp(final File crashFileLog, Context mContext) {
+	public static void upLoadHttp(final File crashFileLog, Context mContext,String server_url) {
 
 		String uuid = CommonUtils.getUUID();
 		// 设备sn 122006000075
@@ -127,7 +126,7 @@ public class CrashUploadUtil {
 
 		// step 3: 创建请求
 		Request request = new Request.Builder()
-				.url(DEVICE_CONTROL_URL)
+				.url(server_url)
 				.post(formBody)
 				.build();
 
