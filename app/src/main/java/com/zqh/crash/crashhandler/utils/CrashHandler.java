@@ -68,13 +68,16 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 		if (mDefaultHandler != null && !handlerException(ex)) {
 			mDefaultHandler.uncaughtException(thread, ex);
 		} else {
+			outEventDealWith();
 			// 程序休眠3s后退出
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+
 			System.exit(0);
+			android.os.Process.killProcess(android.os.Process.myPid());
 		}
 	}
 
@@ -218,6 +221,10 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 	 * @param crashFile
 	 */
 	protected abstract void sendToServer(File crashFile);
+	/***
+	 * 5.4.2 崩溃之后需要处理的事件-外部调用
+	 */
+	public abstract void outEventDealWith();
 
 	public String getDRCrashFilePath() {
 		return mDRCrashFilePath;

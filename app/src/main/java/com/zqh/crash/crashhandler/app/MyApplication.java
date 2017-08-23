@@ -5,7 +5,7 @@ import android.os.Build;
 import android.util.Log;
 
 
-public class MyApplication extends Application {
+public class MyApplication extends Application implements MyCrashHandler.OutEventExec {
 	private static MyApplication instance;
 
 	@Override
@@ -13,7 +13,9 @@ public class MyApplication extends Application {
 		super.onCreate();
 		this.instance = this;
 		Log.e("zqh","DRApplication: initCrashHandler()");
-		MyCrashHandler.getInstance().init(this);
+		MyCrashHandler crashHandler = MyCrashHandler.getInstance();
+		crashHandler.init(this);
+		crashHandler.setOutEventExec(this);
 	}
 	
 	/**
@@ -34,5 +36,9 @@ public class MyApplication extends Application {
 
 	public static MyApplication getInstance() {
 		return instance;
+	}
+	@Override
+	public void outEventExec() {
+		Log.d("zqh", "outEventExec 执行 ");
 	}
 }

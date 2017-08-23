@@ -18,6 +18,7 @@ public class MyCrashHandler extends CrashHandler {
 	private String CRASH_FILE_PATH = "";
 	public static final String DEVICE_CRASH_URL = "http://172.16.3.245:3521/api/carsh/job";
 	public static final String DEVICE_CRASH_URL_KEY = "device_crash_url_key";
+	private OutEventExec mOutEventExec;
 
 	/**
 	 * 初始化,注册Context对象, 获取系统默认的UncaughtException处理器, 设置该CrashHandler为程序的默认处理器
@@ -67,5 +68,20 @@ public class MyCrashHandler extends CrashHandler {
 			server_url = DEVICE_CRASH_URL;
 		}
 		CrashUploadUtil.upLoadHttp(crashFile,mContext,server_url);
+	}
+
+	@Override
+	public void outEventDealWith() {
+		if (mOutEventExec != null) {
+			mOutEventExec.outEventExec();
+		}
+	}
+
+	public interface OutEventExec {
+		public void outEventExec();
+	}
+
+	public void setOutEventExec(OutEventExec mOutEventExec) {
+		this.mOutEventExec = mOutEventExec;
 	}
 }
