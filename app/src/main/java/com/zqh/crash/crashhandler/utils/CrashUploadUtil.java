@@ -9,6 +9,7 @@ import com.zqh.crash.crashhandler.app.MyApplication;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -146,6 +147,42 @@ public class CrashUploadUtil {
 			}
 		});
 	}
+
+	public static void uploadCommonHttp(final File crashFile, Context mContext,String serverUrl){
+		HashMap<String, String> hashMap = new HashMap<String, String>();
+
+		String uuid = CommonUtils.getUUID();
+		// 设备sn 122006000075
+		String dsnCode = android.os.Build.SERIAL;
+		// 发行商id 00100017
+		String vidCode = CommonUtils.getStringFromSettings(mContext,
+				"publisher_id");
+
+		StringBuilder readFile = FileUtil.readFile(crashFile, "UTF-8");
+		//读取完毕就删除文件
+		deleteFile(crashFile);
+
+		// Log.e("zqh",
+		// "str2HexStr = "+HexUtils.str2HexStr(readFile.toString()));
+		String md5SixString = MD5Util.getMD5SixString2(readFile.toString());
+		// Log.e("zqh", "md5SixString = "+md5SixString);
+		String crashFileLog = getParamsCrashFileLog(uuid, dsnCode, vidCode,
+				readFile);
+		// Log.d("zqh", "crashFileLog = " + crashFileLog);
+
+		hashMap.put("uuid", uuid);
+		hashMap.put("dSn", dsnCode);
+		hashMap.put("uploadTime", System.currentTimeMillis() + "");
+		hashMap.put("vId", vidCode);
+		hashMap.put("log", crashFileLog);
+		hashMap.put("md5lg", md5SixString);
+
+		String data = HttpClientUtil.submitPostData(serverUrl, hashMap, "UTF-8");
+
+		Log.d("zqh", "result = "+data);
+	}
+
+
 
 	/** 参数组织 */
 	private static String getParamsCrashFileLog(String uuid, String dsnCode,
