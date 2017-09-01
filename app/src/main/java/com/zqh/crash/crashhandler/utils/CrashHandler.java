@@ -1,5 +1,6 @@
 package com.zqh.crash.crashhandler.utils;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -76,8 +77,10 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 				e.printStackTrace();
 			}
 
-			System.exit(0);
+			ActivityManager activityM = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+			activityM.killBackgroundProcesses(mContext.getPackageName());
 			android.os.Process.killProcess(android.os.Process.myPid());
+			System.exit(0);
 		}
 	}
 
@@ -93,17 +96,25 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
 	 * @param ex
 	 * @return 是否处理了异常
 	 */
+	private long crashTime ;
 	protected boolean handlerException(Throwable ex) {
 
 		if (ex == null) {
 			return false;
 		} else {
-			// 5.1 收集设备参数信息
-			collectDeviceInfo(mContext);
-			// 5.3 保存log和crash到文件
-			saveLogAndCrash(ex);
-			// 5.4 发送log和crash到服务器
-			sendLogAndCrash();
+			long time = System.currentTimeMillis();
+			crashTime = SharePreUtil.getLong(mContext, "CRASHTIME", 0);
+			Log.d("zqh", "time-crashTime = "+(time-crashTime));
+			if (time-crashTime>4000) {
+				// 5.1 收集设备参数信息
+				collectDeviceInfo(mContext);
+				// 5.3 保存log和crash到文件
+				saveLogAndCrash(ex);
+				// 5.4 发送log和crash到服务器
+				sendLogAndCrash();
+			}
+			crashTime = System.currentTimeMillis();
+			SharePreUtil.putLong(mContext, "CRASHTIME", crashTime);
 			return true;
 		}
 	}
