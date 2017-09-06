@@ -3,6 +3,7 @@ package com.zqh.crash.crashhandler.utils;
 
 import android.content.Context;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.zqh.crash.crashhandler.app.MyApplication;
@@ -190,10 +191,19 @@ public class CrashUploadUtil {
 		String oneData = dsnCode + vidCode;
 		Log.d("zqh", "oneData = " + oneData);
 		String oneDataMD5 = MD5Util.getMD5String(oneData);
-		Log.d("zqh", "oneDataMD5 = " + oneDataMD5);
-		Log.d("zqh", "uuid = " + uuid);
+
+		if (!TextUtils.isEmpty(uuid) && uuid.length()>=16) {
+			uuid = uuid+uuid.substring(0, 16);
+		}
+
+		if (!TextUtils.isEmpty(oneDataMD5) && oneDataMD5.length()>=16) {
+			oneDataMD5 = oneDataMD5+oneDataMD5.substring(0, 16);
+		}
+		Log.d("zqh", "oneDataMD5 = " + oneDataMD5);//48
+		Log.d("zqh", "uuid = " + uuid);//48
+
 		String secrurity = xor(oneDataMD5, uuid);
-		Log.e("zqh", "secrurity = "+secrurity);
+		Log.e("zqh", "secrurity = "+secrurity);//48位
 		byte[] hex2Bytes1 = hex2Bytes1(secrurity);
 		
 		return DES3Utils.get3DESData(hex2Bytes1, readFile.toString());
